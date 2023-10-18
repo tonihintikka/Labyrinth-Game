@@ -14,25 +14,51 @@
     <div><!-- Somewhere in your HTML, probably near the top -->
         <button id="requestPermissionBtn">Enable Tilt Controls</button>
         </div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <canvas id="gameCanvas" width="400" height="700"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
         // Pelialueen määrittely
         const labyrinth = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 1, 1, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 1, 0, 1],
-            [1, 1, 0, 1, 0, 1, 0, 1],
-            [0, 0, 0, 1, 0, 1, 0, 1],
-            [0, 1, 1, 1, 0, 1, 0, 1],
-            [0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 2, 1]
-        ];
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 3, 0, 0, 1, 0, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 1],
+    [1, 0, 1, 1, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 2, 1]
+   
+    
+];
+
 
         const cellSize = 50;
-        const ball = { x: 1.5 * cellSize, y: 1.5 * cellSize, radius: 10, speed: 2 };
+        const labyrinthHeight = cellSize * 14; // This is 700 if you have 14 rows
+        let startX, startY;
+
+for(let y = 0; y < labyrinth.length; y++) {
+    for(let x = 0; x < labyrinth[y].length; x++) {
+        if (labyrinth[y][x] === 3) {
+            startX = x;
+            startY = y;
+            break;
+        }
+    }
+    if (startX !== undefined && startY !== undefined) {
+        break;
+    }
+}
+
+const ball = { x: (startX + 0.5) * cellSize, y: (startY + 0.5) * cellSize, radius: 10, speed: 2 };
+
 
         let tiltX = 0; 
     let tiltY = 0; 
@@ -106,14 +132,18 @@ function handleOrientation(event) {
         for (let x = 0; x < labyrinth[y].length; x++) {
             if (labyrinth[y][x] === 1) {
                 ctx.fillStyle = 'black';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
             } else if (labyrinth[y][x] === 2) {
                 ctx.fillStyle = 'green';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
+            } else if (labyrinth[y][x] === 3) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
             }
         }
     }
 }
+
 
 
         function drawBall() {
