@@ -7,185 +7,116 @@
     <style>
         canvas {
             border: 1px solid black;
+            max-width: 100%;
+            display: block;
         }
+        body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif; /* optional, for better typography */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#requestPermissionBtn {
+    padding: 10px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+
+    /* Improve button look when hovered and focused */
+}
+
+#requestPermissionBtn:hover {
+    background-color: #0056b3;
+}
+
+#requestPermissionBtn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,123,255,.5);
+}
+canvas {
+    max-height: 80vh; /* Adjust as needed */
+}
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; 
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover, .close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+
     </style>
 </head>
 <body>
-    <div><!-- Somewhere in your HTML, probably near the top -->
+    <div class="container"><!-- Somewhere in your HTML, probably near the top -->
         <button id="requestPermissionBtn">Enable Tilt Controls</button>
+
+    <canvas id="gameCanvas" ></canvas>
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+          <span class="close-btn">&times;</span>
+          <h2>Congratulations!</h2>
+          <p>Your time: <span id="userTime"></span></p>
+          <h3>Best Times:</h3>
+          <ul id="bestTimesList"></ul>
+          <button id="restartGameBtn">Start Again</button>
         </div>
-    <canvas id="gameCanvas" width="400" height="700"></canvas>
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // Pelialueen määrittely
-        const labyrinth = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 3, 0, 0, 1, 0, 0, 1],
-    [1, 1, 1, 0, 1, 0, 1, 1],
-    [1, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 1, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 0, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 2, 1]
-   
-    
-];
+      </div>
+<!-- Out of Bounds Modal -->
+<div id="outOfBoundsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">×</span>
+        <p>You fell!</p>
+        <button id="startAgainFromOutOfBoundsBtn">Start Again</button>
+    </div>
+</div>
 
 
-        const cellSize = 50;
-        const labyrinthHeight = cellSize * 14; // This is 700 if you have 14 rows
-        let startX, startY;
-
-for(let row = 0; row < labyrinth.length; row++) {
-    for(let col = 0; col < labyrinth[row].length; col++) {
-        if (labyrinth[row][col] === 3) {
-            startX = col;
-            startY = row;
-            break;
-        }
-    }
-    if (startX !== undefined && startY !== undefined) {
-        break;
-    }
-}
-
-
-const ball = { 
-    x: (startX + 0.5) * cellSize, 
-    y: (startY + 0.5) * cellSize, 
-    radius: 10, 
-    speed: 2, 
-    velocityX: 0, 
-    velocityY: 0
-};
-
-
-
-        let tiltX = 0; 
-    let tiltY = 0; 
-
-    document.addEventListener('keydown', function(event) {
-        switch (event.key) {
-            case 'q': tiltX -= 0.1; break;
-            case 'w': tiltX += 0.1; break;
-            case 'ArrowUp': tiltY -= 0.1; break;
-            case 'ArrowDown': tiltY += 0.1; break;
-        }
-    });
-    const requestBtn = document.getElementById('requestPermissionBtn');
-
-requestBtn.addEventListener('click', function() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS 13+
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                if (response == 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                    requestBtn.style.display = 'none'; // Optionally hide the button after getting permission
-                }
-            })
-            .catch(console.error);
-    } else {
-        // For older devices or browsers that do not require permission
-        window.addEventListener('deviceorientation', handleOrientation);
-        requestBtn.style.display = 'none'; // Optionally hide the button if permission is not needed
-    }
-});
-
-function handleOrientation(event) {
-    // Your code to handle orientation changes
-
-    // This is a basic implementation; you might need to adjust the values and logic
-    tiltX = event.gamma / 45; // gamma is the x-axis tilt in degrees. Normalize to a value between -1 and 1
-    tiltY = event.beta / 45;  // beta is the y-axis tilt in degrees. Normalize to a value between -1 and 1
-
-    // Ensure tilt values remain within the [-1,1] interval
-    tiltX = Math.min(Math.max(tiltX, -1), 1);
-    tiltY = Math.min(Math.max(tiltY, -1), 1);
-}
-
-
-
-
-function checkCollisionWithWalls() {
-    const cellX = Math.floor(ball.x / cellSize);
-    const cellY = Math.floor(ball.y / cellSize);
-
-    if (labyrinth[cellY][cellX] === 1) {
-        ball.x = (startX + 0.5) * cellSize;
-        ball.y = (startY + 0.5) * cellSize;
-        tiltX = 0;
-        tiltY = 0;
-    } else if (labyrinth[cellY][cellX] === 2) {
-        alert("You've reached the end!");
-        ball.x = (startX + 0.5) * cellSize;
-        ball.y = (startY + 0.5) * cellSize;
-    }
-}
-
-
-function updateBallPosition() {
-    const acceleration = 0.05;  // Adjust this value to make acceleration faster or slower
-    const damping = 0.98;       // Adjust this value for how quickly the ball should slow down. Closer to 1 = slower damping
-
-    ball.velocityX += tiltX * acceleration;
-    ball.velocityY += tiltY * acceleration;
-
-    ball.velocityX *= damping;
-    ball.velocityY *= damping;
-
-    ball.x += ball.velocityX;
-    ball.y += ball.velocityY;
-
-    checkCollisionWithWalls();
-}
-
-
-    function drawLabyrinth() {
-    for (let y = 0; y < labyrinth.length; y++) {
-        for (let x = 0; x < labyrinth[y].length; x++) {
-            if (labyrinth[y][x] === 1) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            } else if (labyrinth[y][x] === 2) {
-                ctx.fillStyle = 'green';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            } else if (labyrinth[y][x] === 3) {
-                ctx.fillStyle = 'white';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            }
-        }
-    }
-}
-
-
-
-
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'red';
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawLabyrinth();
-        updateBallPosition();
-        drawBall();
-        requestAnimationFrame(drawGame);
-        }
-
-        drawGame();
+      
+    </div>
+    <script src="labyrinthgame.js">
+        
 
     </script>
 </body>
