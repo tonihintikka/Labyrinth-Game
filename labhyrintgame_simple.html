@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div><!-- Somewhere in your HTML, probably near the top -->
+        <button id="requestPermissionBtn">Enable Tilt Controls</button>
+        </div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Pelialueen määrittely
+        const labyrinth = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 1, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0, 1, 0, 1],
+            [1, 1, 0, 1, 0, 1, 0, 1],
+            [0, 0, 0, 1, 0, 1, 0, 1],
+            [0, 1, 1, 1, 0, 1, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 2, 1]
+        ];
+
+        const cellSize = 50;
+        const ball = { x: 1.5 * cellSize, y: 1.5 * cellSize, radius: 10, speed: 2 };
+
+        let tiltX = 0; 
+    let tiltY = 0; 
+
+    document.addEventListener('keydown', function(event) {
+        switch (event.key) {
+            case 'q': tiltX -= 0.1; break;
+            case 'w': tiltX += 0.1; break;
+            case 'ArrowUp': tiltY -= 0.1; break;
+            case 'ArrowDown': tiltY += 0.1; break;
+        }
+    });
+    const requestBtn = document.getElementById('requestPermissionBtn');
+
+requestBtn.addEventListener('click', function() {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response == 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    requestBtn.style.display = 'none'; // Optionally hide the button after getting permission
+                }
+            })
+            .catch(console.error);
+    } else {
+        // For older devices or browsers that do not require permission
+        window.addEventListener('deviceorientation', handleOrientation);
+        requestBtn.style.display = 'none'; // Optionally hide the button if permission is not needed
+    }
+});
+
+function handleOrientation(event) {
+    // Your code to handle orientation changes
+
+    // This is a basic implementation; you might need to adjust the values and logic
+    tiltX = event.gamma / 45; // gamma is the x-axis tilt in degrees. Normalize to a value between -1 and 1
+    tiltY = event.beta / 45;  // beta is the y-axis tilt in degrees. Normalize to a value between -1 and 1
+
+    // Ensure tilt values remain within the [-1,1] interval
+    tiltX = Math.min(Math.max(tiltX, -1), 1);
+    tiltY = Math.min(Math.max(tiltY, -1), 1);
+}
+
+
+
+
+    function checkCollisionWithWalls() {
+    const cellX = Math.floor(ball.x / cellSize);
+    const cellY = Math.floor(ball.y / cellSize);
+
+    if (labyrinth[cellY][cellX] === 1) {
+        ball.x = 1.5 * cellSize; 
+        ball.y = 1.5 * cellSize; 
+        tiltX = 0;
+        tiltY = 0;
+    } else if (labyrinth[cellY][cellX] === 2) {
+        alert("You've reached the end!");
+    }
+}
+
+    function updateBallPosition() {
+        ball.x += tiltX;
+        ball.y += tiltY;
+
+        checkCollisionWithWalls();
+    }
+
+    function drawLabyrinth() {
+    for (let y = 0; y < labyrinth.length; y++) {
+        for (let x = 0; x < labyrinth[y].length; x++) {
+            if (labyrinth[y][x] === 1) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            } else if (labyrinth[y][x] === 2) {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        }
+    }
+}
+
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawLabyrinth();
+        updateBallPosition();
+        drawBall();
+        requestAnimationFrame(drawGame);
+        }
+
+        drawGame();
+
+    </script>
+</body>
+</html>
