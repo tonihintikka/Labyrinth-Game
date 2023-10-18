@@ -44,11 +44,11 @@
         const labyrinthHeight = cellSize * 14; // This is 700 if you have 14 rows
         let startX, startY;
 
-for(let y = 0; y < labyrinth.length; y++) {
-    for(let x = 0; x < labyrinth[y].length; x++) {
-        if (labyrinth[y][x] === 3) {
-            startX = x;
-            startY = y;
+for(let row = 0; row < labyrinth.length; row++) {
+    for(let col = 0; col < labyrinth[row].length; col++) {
+        if (labyrinth[row][col] === 3) {
+            startX = col;
+            startY = row;
             break;
         }
     }
@@ -57,7 +57,16 @@ for(let y = 0; y < labyrinth.length; y++) {
     }
 }
 
-const ball = { x: (startX + 0.5) * cellSize, y: (startY + 0.5) * cellSize, radius: 10, speed: 2 };
+
+const ball = { 
+    x: (startX + 0.5) * cellSize, 
+    y: (startY + 0.5) * cellSize, 
+    radius: 10, 
+    speed: 2, 
+    velocityX: 0, 
+    velocityY: 0
+};
+
 
 
         let tiltX = 0; 
@@ -106,43 +115,57 @@ function handleOrientation(event) {
 
 
 
-    function checkCollisionWithWalls() {
+function checkCollisionWithWalls() {
     const cellX = Math.floor(ball.x / cellSize);
     const cellY = Math.floor(ball.y / cellSize);
 
     if (labyrinth[cellY][cellX] === 1) {
-        ball.x = 1.5 * cellSize; 
-        ball.y = 1.5 * cellSize; 
+        ball.x = (startX + 0.5) * cellSize;
+        ball.y = (startY + 0.5) * cellSize;
         tiltX = 0;
         tiltY = 0;
     } else if (labyrinth[cellY][cellX] === 2) {
         alert("You've reached the end!");
+        ball.x = (startX + 0.5) * cellSize;
+        ball.y = (startY + 0.5) * cellSize;
     }
 }
 
-    function updateBallPosition() {
-        ball.x += tiltX;
-        ball.y += tiltY;
 
-        checkCollisionWithWalls();
-    }
+function updateBallPosition() {
+    const acceleration = 0.05;  // Adjust this value to make acceleration faster or slower
+    const damping = 0.98;       // Adjust this value for how quickly the ball should slow down. Closer to 1 = slower damping
+
+    ball.velocityX += tiltX * acceleration;
+    ball.velocityY += tiltY * acceleration;
+
+    ball.velocityX *= damping;
+    ball.velocityY *= damping;
+
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+
+    checkCollisionWithWalls();
+}
+
 
     function drawLabyrinth() {
     for (let y = 0; y < labyrinth.length; y++) {
         for (let x = 0; x < labyrinth[y].length; x++) {
             if (labyrinth[y][x] === 1) {
                 ctx.fillStyle = 'black';
-                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             } else if (labyrinth[y][x] === 2) {
                 ctx.fillStyle = 'green';
-                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             } else if (labyrinth[y][x] === 3) {
                 ctx.fillStyle = 'white';
-                ctx.fillRect(x * cellSize, startY + y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
         }
     }
 }
+
 
 
 
