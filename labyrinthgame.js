@@ -266,16 +266,21 @@ function checkCollisionWithCanvasBounds() {
     ball.y + ball.radius > canvas.height
   ) {
     // Ball has gone out of the canvas bounds
-    ball.x = (startX + 0.5) * cellSize;
-    ball.y = (startY + 0.5) * cellSize;
-    ball.velocityX = 0;
-    ball.velocityY = 0;
-    tiltX = 0;
-    tiltY = 0;
-    gameStarted = false;
-    stopTimer();
-    elapsedTime = 0;
-    showOutOfBoundsModal();
+
+    if (gameStarted) {
+      // Only show the modal if the game is still active
+
+      ball.x = (startX + 0.5) * cellSize;
+      ball.y = (startY + 0.5) * cellSize;
+      ball.velocityX = 0;
+      ball.velocityY = 0;
+      tiltX = 0;
+      tiltY = 0;
+      gameStarted = false;
+      stopTimer();
+      elapsedTime = 0;
+      showOutOfBoundsModal(); // Keep only this call
+    }
   }
 }
 
