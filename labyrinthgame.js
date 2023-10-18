@@ -230,8 +230,14 @@ function checkCollisionWithWalls() {
     saveTime(elapsedTime);
     ball.x = (startX + 0.5) * cellSize;
     ball.y = (startY + 0.5) * cellSize;
-    showResults();
+
     gameStarted = false; // Setting the game to be inactive after reaching the end
+    // Additional code to stop the ball movement
+    ball.velocityX = 0;
+    ball.velocityY = 0;
+    tiltX = 0;
+    tiltY = 0;
+    showResults();
   }
 }
 
