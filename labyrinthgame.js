@@ -238,6 +238,7 @@ function checkCollisionWithWalls() {
     tiltX = 0;
     tiltY = 0;
     showResults();
+    return;
   }
 }
 
