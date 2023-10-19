@@ -171,6 +171,7 @@ var startAgainFromOutOfBoundsBtn = document.getElementById(
 function showOutOfBoundsModal() {
   if (!gameStarted) return; // If the game isn't active, don't show the modal
   stopTimer();
+  gameStarted = false;
   outOfBoundsModal.style.display = "block";
 }
 
@@ -220,7 +221,7 @@ function checkCollisionWithWalls() {
     ball.y = (startY + 0.5) * cellSize;
     tiltX = 0;
     tiltY = 0;
-    gameStarted = false; // Optional: If you want the game to reset upon hitting a wall
+    // Optional: If you want the game to reset upon hitting a wall
     // Timer logic when ball falls
     stopTimer(); // Stop the current timer
     elapsedTime = 0; // Reset the elapsed time
@@ -229,8 +230,8 @@ function checkCollisionWithWalls() {
   } else if (labyrinth[cellY][cellX] === 2) {
     stopTimer();
     saveTime(elapsedTime);
-    ball.x = (startX + 0.5) * cellSize;
-    ball.y = (startY + 0.5) * cellSize;
+    //ball.x = (startX + 0.5) * cellSize;
+    //ball.y = (startY + 0.5) * cellSize;
 
     gameStarted = false; // Setting the game to be inactive after reaching the end
     // Additional code to stop the ball movement

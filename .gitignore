@@ -40,6 +40,7 @@ bower_components
 .vscode/
 *.sublime-project
 *.sublime-workspace
+*.pem
 
 # OS generated files
 .DS_Store
