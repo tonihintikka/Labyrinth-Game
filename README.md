@@ -2,6 +2,10 @@
 
 A simple browser-based Labyrinth game where users guide a ball through a maze using keyboard controls or device tilt on mobile.
 
+## demo
+
+[Vercel](https://labyrinth-game-11xqp5rqn-tonihintikka.vercel.app)
+
 ## Features
 
 - Navigate the ball through the maze using the keyboard (for desktop users).
