@@ -169,6 +169,7 @@ var startAgainFromOutOfBoundsBtn = document.getElementById(
 );
 
 function showOutOfBoundsModal() {
+  if (!gameStarted) return; // If the game isn't active, don't show the modal
   stopTimer();
   outOfBoundsModal.style.display = "block";
 }
