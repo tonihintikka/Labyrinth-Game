@@ -1,22 +1,23 @@
 let canvas = document.getElementById("gameCanvas");
 let ctx = canvas.getContext("2d");
+let gamePaused = false;
 
 // Pelialueen määrittely
 const labyrinth = [
   [1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 3, 0, 0, 1, 0, 0, 1],
-  [1, 1, 0, 0, 1, 0, 1, 1],
-  [1, 0, 0, 1, 0, 0, 1, 1],
-  [1, 0, 1, 1, 0, 1, 1, 1],
-  [1, 0, 1, 1, 0, 1, 0, 1],
+  [1, 3, 0, 0, 1, 0, 0, 0],
+  [1, 1, 0, 0, 1, 0, 1, 0],
+  [1, 0, 0, 1, 0, 0, 1, 0],
+  [1, 0, 1, 1, 0, 1, 1, 0],
+  [1, 0, 1, 1, 0, 1, 0, 0],
   [1, 0, 1, 0, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 0, 1, 0, 1],
   [1, 0, 1, 1, 0, 1, 0, 1],
   [1, 0, 1, 0, 0, 1, 0, 0],
   [1, 0, 1, 1, 0, 1, 1, 0],
   [1, 0, 0, 0, 0, 1, 1, 0],
-  [1, 0, 1, 1, 0, 1, 1, 0],
-  [1, 1, 1, 1, 1, 1, 2, 0],
+  [1, 0, 1, 1, 1, 2, 0, 0],
+  [1, 1, 1, 1, 1, 1, 1, 0],
 ];
 
 let startTime;
@@ -42,7 +43,7 @@ for (let row = 0; row < labyrinth.length; row++) {
   }
 }
 
-const ball = {
+let ball = {
   x: (startX + 0.5) * cellSize,
   y: (startY + 0.5) * cellSize,
   radius: 10,
@@ -150,6 +151,7 @@ function saveTime() {
 // Call the startTimer() function when the game starts
 // Call the stopTimer() function when the game ends
 function displayBestTimes() {
+  gamePaused = true;
   const bestTimes = JSON.parse(localStorage.getItem("bestTimes") || "[]");
   const bestTimesList = document.createElement("ul");
   bestTimes.forEach((time) => {
@@ -192,8 +194,11 @@ function resetGame() {
   ball.velocityY = 0;
   tiltX = 0;
   tiltY = 0;
-  gameStarted = false;
+  gameStarted = true; // Set the game to active state upon restart
   elapsedTime = 0;
+  gamePaused = false;
+  gameStarted = false;
+  return;
 }
 
 function handleOrientation(event) {
@@ -292,17 +297,62 @@ var modal = document.getElementById("resultModal");
 var span = document.getElementsByClassName("close-btn")[0];
 var restartGameBtn = document.getElementById("restartGameBtn");
 
-// When user reaches the end, open the modal
+let resultsShown = false;
+
+function resetBallPosition() {}
+
+let allLevelsBestTimes = JSON.parse(
+  localStorage.getItem("allLevelsBestTimes") || "{}"
+);
 function showResults() {
   stopTimer();
-  document.getElementById("userTime").textContent = formatTime(elapsedTime); // Assuming you have a formatTime function
-  // TODO: Add logic to populate bestTimesList with best times
-  modal.style.display = "block";
+  gamePaused = true;
+  // Current level code (you can update this dynamically when you have multiple levels)
+  const currentLevel = "LVL1";
+
+  // Set the level in the "Congratulations" message
+  document.getElementById(
+    "congratsLevelMessage"
+  ).textContent = `Congratulations! You passed ${currentLevel}`;
+
+  document.getElementById("userTime").textContent = formatTime(elapsedTime);
+
+  // If there aren't any saved times for this level yet, initialize an empty array
+  if (!allLevelsBestTimes[currentLevel]) {
+    allLevelsBestTimes[currentLevel] = [];
+  }
+
+  // Save new time
+  allLevelsBestTimes[currentLevel].push(elapsedTime);
+
+  // Sort and limit to top 20 times for this level
+  allLevelsBestTimes[currentLevel] = allLevelsBestTimes[currentLevel]
+    .sort((a, b) => a - b)
+    .slice(0, 20);
+
+  localStorage.setItem(
+    "allLevelsBestTimes",
+    JSON.stringify(allLevelsBestTimes)
+  );
+
+  // Display best times for the current level
+  let bestTimesList = document.getElementById("bestTimesList");
+  bestTimesList.innerHTML = ""; // clear any previous times
+
+  let orderNumber = 1; // initialize order number
+  for (let time of allLevelsBestTimes[currentLevel]) {
+    let listItem = document.createElement("li");
+    listItem.textContent = `${orderNumber}. ` + formatTime(time); // Add order number before the time
+    bestTimesList.appendChild(listItem);
+    orderNumber++; // increment order number
+  }
+
+  resetGame();
+  modal.style.display = "block"; // assuming you already have a reference to the modal
 }
 
 // When user clicks on the close button, close the modal
 span.onclick = function () {
-  modal.style.display = "none";
   // 1. Reset Ball Position
   ball.x = (startX + 0.5) * cellSize;
   ball.y = (startY + 0.5) * cellSize;
@@ -321,12 +371,13 @@ span.onclick = function () {
 
   // 5. Reset Game State
   gameStarted = false;
+  gamePaused = false;
+  modal.style.display = "none";
 };
 
 // When user clicks anywhere outside of the modal, close it
 window.onclick = function (event) {
   if (event.target == modal) {
-    modal.style.display = "none";
     // 1. Reset Ball Position
     ball.x = (startX + 0.5) * cellSize;
     ball.y = (startY + 0.5) * cellSize;
@@ -345,13 +396,13 @@ window.onclick = function (event) {
 
     // 5. Reset Game State
     gameStarted = false;
+    gamePaused = false;
+    modal.style.display = "none";
   }
 };
 
 // Add an event listener for the restart button
 restartGameBtn.addEventListener("click", function () {
-  modal.style.display = "none"; // Close the modal
-
   // 1. Reset Ball Position
   ball.x = (startX + 0.5) * cellSize;
   ball.y = (startY + 0.5) * cellSize;
@@ -370,6 +421,8 @@ restartGameBtn.addEventListener("click", function () {
 
   // 5. Reset Game State
   gameStarted = false;
+  gamePaused = false;
+  modal.style.display = "none"; // Close the modal
 });
 
 function drawLabyrinth() {
@@ -398,6 +451,9 @@ function drawBall() {
 }
 
 function drawGame() {
+  console.log("Draw game gameStarted: ", gameStarted);
+  console.log("Draw game gamePaused:", gamePaused);
+  if (gamePaused) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawLabyrinth();
   updateBallPosition();
