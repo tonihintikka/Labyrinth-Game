@@ -7,7 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/server.js",
     "start-ngrok": "ngrok http 3000",
-    "dev": "concurrently \"npm run start\" \"npm run start-ngrok\" \"open http://127.0.0.1:4040\""
+    "dev": "concurrently \"npm run start\" \"npm run start-ngrok\" \"open http://127.0.0.1:4040\"",
+    "setup-firebase": "node setup-firebase.js",
+    "firebase:serve": "firebase serve",
+    "firebase:deploy": "firebase deploy",
+    "firebase:deploy-hosting": "firebase deploy --only hosting",
+    "firebase:deploy-rules": "firebase deploy --only firestore:rules,database",
+    "test:firebase": "open http://localhost:5002/test-firebase.html && npm run firebase:serve"
   },
   "keywords": [],
   "author": "",

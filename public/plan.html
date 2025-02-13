@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Game - Level Editor</title>
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <style>
+        #admin-required-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .editor-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/play.html" class="nav-link">Play Game</a>
+    </div>
+    
+    <div id="admin-required-message">
+        <h2>Admin Access Required</h2>
+        <p>You need to be logged in as an admin to access the level editor.</p>
+        <a href="/" class="nav-link">Return to Home</a>
+    </div>
+
+    <div class="editor-content">
+        <div class="container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="editor-controls">
+                <div class="editor-buttons">
+                    <button data-tile="1" class="tile-btn">Wall</button>
+                    <button data-tile="4" class="tile-btn">Wood</button>
+                    <button data-tile="5" class="tile-btn">Hole Top</button>
+                    <button data-tile="6" class="tile-btn">Hole Right</button>
+                    <button data-tile="7" class="tile-btn">Hole Bottom</button>
+                    <button data-tile="8" class="tile-btn">Hole Left</button>
+                    <button data-tile="0" class="tile-btn">Path</button>
+                    <button data-tile="3" class="tile-btn">Start</button>
+                    <button data-tile="2" class="tile-btn">End</button>
+                </div>
+                <button id="testLevel" class="editor-action-btn">Test Level</button>
+                <button id="saveLevel" class="editor-action-btn">Save Level</button>
+                <button id="loadLevel" class="editor-action-btn">Load Level</button>
+            </div>
+            <div id="testModeIndicator" class="test-mode-indicator">
+                Test Mode - Press ESC to Exit
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import AuthUI from './js/auth-ui.js';
+        import AuthService from './js/AuthService.js';
+
+        // Initialize authentication UI
+        AuthUI.init();
+
+        // Check admin status and show/hide appropriate content
+        function updateEditorAccess(authState) {
+            const editorContent = document.querySelector('.editor-content');
+            const adminMessage = document.getElementById('admin-required-message');
+            
+            if (authState.isAdmin) {
+                editorContent.style.display = 'block';
+                adminMessage.style.display = 'none';
+            } else {
+                editorContent.style.display = 'none';
+                adminMessage.style.display = 'block';
+            }
+        }
+
+        // Listen for auth state changes
+        AuthService.addAuthStateListener(updateEditorAccess);
+    </script>
+    <script type="module" src="js/plan.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Only admins can write to user profiles (to manage roles)
+      allow write: if isAdmin();
+      // Allow creation of new user profiles during sign up
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Levels collection
+    match /levels/{levelId} {
+      // Anyone can read levels
+      allow read: if true;
+      // Only admins can create/update/delete levels
+      allow write: if isAdmin();
+    }
+    
+    // Scores collection
+    match /scores/{scoreId} {
+      // Anyone can read scores
+      allow read: if true;
+      // Authenticated users can create scores
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.playerName == request.auth.token.email;
+      // Users can only modify their own scores
+      allow update, delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+  }
+}

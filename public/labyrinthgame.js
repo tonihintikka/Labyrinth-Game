@@ -238,7 +238,7 @@ function checkCollisionWithWalls() {
     //ball.x = (startX + 0.5) * cellSize;
     //ball.y = (startY + 0.5) * cellSize;
 
-    gameStarted = false; // Setting the game to be inactive after reaching the end
+    gameStarted = false; // Setting the game to inactive after reaching the end
     // Additional code to stop the ball movement
     ball.velocityX = 0;
     ball.velocityY = 0;
@@ -462,3 +462,201 @@ function drawGame() {
 }
 
 drawGame();
+
+// Add these constants near the top of the file after other constants
+const WALL = 1;
+const PATH = 0;
+const END = 2;
+const START = 3;
+
+// Add editor state variables after other state variables
+let isEditorMode = false;
+let currentTileType = WALL;
+
+// Add these variables after other state variables
+let isTestMode = false;
+let originalLabyrinth = null;
+let isDragging = false;
+
+function initializeEditor() {
+    const editorControls = document.createElement('div');
+    editorControls.className = 'editor-controls';
+    editorControls.innerHTML = `
+        <button id="toggleEditor" class="editor-action-btn">Toggle Editor</button>
+        <div id="editorOptions" style="display: none;">
+            <div class="editor-buttons">
+                <button data-tile="${WALL}" class="tile-btn">Wall</button>
+                <button data-tile="${PATH}" class="tile-btn">Path</button>
+                <button data-tile="${START}" class="tile-btn">Start</button>
+                <button data-tile="${END}" class="tile-btn">End</button>
+            </div>
+            <button id="testLevel" class="editor-action-btn">Test Level</button>
+            <button id="saveLevel" class="editor-action-btn">Save Level</button>
+            <button id="loadLevel" class="editor-action-btn">Load Level</button>
+        </div>
+        <div id="testModeIndicator" class="test-mode-indicator">
+            Test Mode - Press ESC to Exit
+        </div>
+    `;
+    document.body.appendChild(editorControls);
+
+    // Add event listeners
+    setupEditorEventListeners();
+}
+
+function setupEditorEventListeners() {
+    document.getElementById('toggleEditor').addEventListener('click', toggleEditor);
+    
+    // Tile button listeners
+    document.querySelectorAll('.tile-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.tile-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentTileType = parseInt(e.target.dataset.tile);
+        });
+    });
+
+    // Canvas painting listeners
+    canvas.addEventListener('mousedown', startPainting);
+    canvas.addEventListener('mousemove', paint);
+    canvas.addEventListener('mouseup', stopPainting);
+    canvas.addEventListener('mouseleave', stopPainting);
+
+    // Other button listeners
+    document.getElementById('testLevel').addEventListener('click', toggleTestMode);
+    document.getElementById('saveLevel').addEventListener('click', saveLevelToStorage);
+    document.getElementById('loadLevel').addEventListener('click', showLevelSelector);
+
+    // ESC key listener for exiting test mode
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isTestMode) {
+            toggleTestMode();
+        }
+    });
+}
+
+function startPainting(e) {
+    if (!isEditorMode || isTestMode) return;
+    isDragging = true;
+    paint(e);
+}
+
+function stopPainting() {
+    isDragging = false;
+}
+
+function paint(e) {
+    if (!isDragging || !isEditorMode || isTestMode) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const cellX = Math.floor(x / cellSize);
+    const cellY = Math.floor(y / cellSize);
+
+    if (cellY < labyrinth.length && cellX < labyrinth[0].length) {
+        if (currentTileType === START) {
+            // Remove existing start point
+            for (let row = 0; row < labyrinth.length; row++) {
+                for (let col = 0; col < labyrinth[row].length; col++) {
+                    if (labyrinth[row][col] === START) {
+                        labyrinth[row][col] = PATH;
+                    }
+                }
+            }
+        }
+        labyrinth[cellY][cellX] = currentTileType;
+        drawLabyrinth();
+    }
+}
+
+function toggleTestMode() {
+    isTestMode = !isTestMode;
+    const testModeIndicator = document.getElementById('testModeIndicator');
+    
+    if (isTestMode) {
+        // Store current labyrinth state
+        originalLabyrinth = labyrinth.map(row => [...row]);
+        // Reset ball position and start game
+        resetGame();
+        gameStarted = false;
+        gamePaused = false;
+        testModeIndicator.style.display = 'block';
+    } else {
+        // Restore original labyrinth
+        labyrinth = originalLabyrinth.map(row => [...row]);
+        gamePaused = true;
+        gameStarted = false;
+        testModeIndicator.style.display = 'none';
+        drawLabyrinth();
+    }
+}
+
+function toggleEditor() {
+    isEditorMode = !isEditorMode;
+    gamePaused = isEditorMode;
+    const editorOptions = document.getElementById('editorOptions');
+    editorOptions.style.display = isEditorMode ? 'block' : 'none';
+    
+    if (!isEditorMode && isTestMode) {
+        toggleTestMode();
+    }
+}
+
+function saveLevelToStorage() {
+    const levelName = prompt('Enter a name for this level:');
+    if (!levelName) return;
+
+    const savedLevels = JSON.parse(localStorage.getItem('labyrinthLevels') || '{}');
+    savedLevels[levelName] = labyrinth;
+    localStorage.setItem('labyrinthLevels', JSON.stringify(savedLevels));
+    alert('Level saved successfully!');
+}
+
+function showLevelSelector() {
+    const savedLevels = JSON.parse(localStorage.getItem('labyrinthLevels') || '{}');
+    const levelNames = Object.keys(savedLevels);
+    
+    if (levelNames.length === 0) {
+        alert('No saved levels found!');
+        return;
+    }
+
+    const selector = document.createElement('div');
+    selector.style.position = 'fixed';
+    selector.style.top = '50%';
+    selector.style.left = '50%';
+    selector.style.transform = 'translate(-50%, -50%)';
+    selector.style.backgroundColor = 'white';
+    selector.style.padding = '20px';
+    selector.style.border = '1px solid black';
+    selector.style.zIndex = '1000';
+
+    selector.innerHTML = `
+        <h3>Select a level to load:</h3>
+        <select id="levelSelect">
+            ${levelNames.map(name => `<option value="${name}">${name}</option>`).join('')}
+        </select>
+        <button id="confirmLoad">Load</button>
+        <button id="cancelLoad">Cancel</button>
+    `;
+
+    document.body.appendChild(selector);
+
+    document.getElementById('confirmLoad').addEventListener('click', () => {
+        const selectedLevel = document.getElementById('levelSelect').value;
+        labyrinth.length = 0;
+        const newLevel = savedLevels[selectedLevel];
+        newLevel.forEach(row => labyrinth.push([...row]));
+        resetGame();
+        document.body.removeChild(selector);
+    });
+
+    document.getElementById('cancelLoad').addEventListener('click', () => {
+        document.body.removeChild(selector);
+    });
+}
+
+// Add this line at the end of your existing code
+initializeEditor();

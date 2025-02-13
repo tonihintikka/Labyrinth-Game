@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Services Verification</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background-color: #f5f5f5;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #console {
+            background-color: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            min-height: 300px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .success {
+            color: #4caf50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .info {
+            color: #2196f3;
+        }
+        .nav {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav a {
+            color: #2196f3;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Services Verification</h1>
+    <div class="nav">
+        <a href="/test-firebase.html">Firebase Setup Test</a>
+        <a href="/verify-firebase.html">Service Verification</a>
+        <a href="/">Back to Game</a>
+    </div>
+    <div id="console"></div>
+
+    <script>
+        // Override console.log to display in our custom console
+        const consoleDiv = document.getElementById('console');
+        const originalConsole = { ...console };
+
+        function appendToConsole(message, type = 'log') {
+            const line = document.createElement('div');
+            if (typeof message === 'object') {
+                message = JSON.stringify(message, null, 2);
+            }
+            
+            // Add color classes based on message type
+            if (message.includes('✅')) {
+                line.className = 'success';
+            } else if (message.includes('❌')) {
+                line.className = 'error';
+            } else if (message.includes('🔍') || message.includes('Next steps:')) {
+                line.className = 'info';
+            }
+            
+            line.textContent = message;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        console.log = (...args) => {
+            originalConsole.log(...args);
+            args.forEach(msg => appendToConsole(msg));
+        };
+        console.error = (...args) => {
+            originalConsole.error(...args);
+            args.forEach(msg => appendToConsole(msg, 'error'));
+        };
+    </script>
+    
+    <script type="module" src="verify-firebase-services.js"></script>
+</body>
+</html>

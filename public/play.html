@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Game - Play Mode</title>
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+        .best-times-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .best-times-table th, .best-times-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .best-times-table th {
+            background-color: #f5f5f5;
+        }
+        .current-user-score {
+            background-color: #e8f5e9;
+        }
+        #loginPrompt {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/plan.html" class="nav-link">Level Editor</a>
+    </div>
+    <div class="container">
+        <button id="requestPermissionBtn">Enable Tilt Controls</button>
+        <canvas id="gameCanvas"></canvas>
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="congratsLevelMessage">Congratulations! You passed LVL1</h2>
+                <p>Your time: <span id="userTime"></span></p>
+                <h3>High Scores:</h3>
+                <table class="best-times-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Time</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bestTimesList">
+                    </tbody>
+                </table>
+                <div id="loginPrompt">
+                    <p>Log in to save your high scores!</p>
+                </div>
+                <button id="restartGameBtn">Start Again</button>
+            </div>
+        </div>
+        <div id="outOfBoundsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">×</span>
+                <p>You fell!</p>
+                <button id="startAgainFromOutOfBoundsBtn">Start Again</button>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import AuthUI from './js/auth-ui.js';
+        import AuthService from './js/AuthService.js';
+
+        // Initialize authentication UI
+        AuthUI.init();
+
+        // Update login prompt visibility based on auth state
+        AuthService.addAuthStateListener((authState) => {
+            const loginPrompt = document.getElementById('loginPrompt');
+            if (loginPrompt) {
+                loginPrompt.style.display = authState.user ? 'none' : 'block';
+            }
+        });
+    </script>
+    <script type="module" src="js/play.js"></script>
+</body>
+</html>

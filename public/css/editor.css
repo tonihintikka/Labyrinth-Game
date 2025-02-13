@@ -1,0 +1,164 @@
+/* Editor Controls */
+.editor-controls {
+    position: fixed;
+    top: 50px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.editor-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.tile-btn {
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tile-btn.active {
+    background: #4CAF50;
+    color: white;
+    border-color: #45a049;
+}
+
+.editor-action-btn {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: none;
+    background: #2196F3;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.editor-action-btn:hover {
+    background: #1976D2;
+}
+
+/* Test Mode Indicator */
+.test-mode-indicator {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+/* Cursor Styles */
+.cursor-wall { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: gray;"></svg>') 10 10, auto; }
+.cursor-path { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: white;"></svg>') 10 10, auto; }
+.cursor-start { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: blue;"></svg>') 10 10, auto; }
+.cursor-end { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: green;"></svg>') 10 10, auto; }
+.cursor-wood { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: brown;"></svg>') 10 10, auto; }
+.cursor-hole { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="background: black;"></svg>') 10 10, auto; }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+}
+
+.modal-header {
+    margin: 0 0 15px 0;
+}
+
+.modal-select {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.modal-select:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.modal-select.error {
+    border-color: #f44336;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-button-secondary {
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+}
+
+.modal-button-secondary:hover {
+    background: #e0e0e0;
+}
+
+.modal-button-primary {
+    background: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.modal-button-primary:hover {
+    background: #45a049;
+}
+
+.modal-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}

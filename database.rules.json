@@ -1,0 +1,53 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "levels": {
+      ".read": true,
+      "$levelId": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".validate": "newData.hasChildren(['data', 'updatedAt'])",
+        "data": {
+          ".validate": "newData.isString() || newData.hasChildren()"
+        },
+        "updatedAt": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/)"
+        }
+      }
+    },
+    
+    "scores": {
+      ".read": true,
+      "$levelId": {
+        ".indexOn": ["time"],
+        "$scoreId": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['time', 'userId', 'playerName', 'createdAt'])",
+          "userId": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "playerName": {
+            ".validate": "newData.val() === auth.token.email"
+          },
+          "time": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "createdAt": {
+            ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/)"
+          }
+        }
+      }
+    },
+    
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "role": {
+          ".validate": "newData.val() === 'user' || newData.val() === 'admin'"
+        }
+      }
+    }
+  }
+}

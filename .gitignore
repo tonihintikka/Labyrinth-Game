@@ -50,3 +50,12 @@ bower_components
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Firebase configuration
+public/js/firebase-config.js
+.env
+.env.local
+.env.development
+.env.production
+.firebase/
+firebase-debug.log*
